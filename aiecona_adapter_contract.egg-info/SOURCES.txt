@@ -1,0 +1,10 @@
+README.md
+pyproject.toml
+aiecona_adapter_contract.egg-info/PKG-INFO
+aiecona_adapter_contract.egg-info/SOURCES.txt
+aiecona_adapter_contract.egg-info/dependency_links.txt
+aiecona_adapter_contract.egg-info/top_level.txt
+contract/entities.py
+contract/interface.py
+contract/markers.py
+contract/version.py
