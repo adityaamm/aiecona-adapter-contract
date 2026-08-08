@@ -11,3 +11,10 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 packages = ["contract"]
+
+# The JSON schema must travel WITH the installed package. Without this, a consumer
+# that pip-installs the contract gets the Python modules but not the schema, and any
+# profile validation fails at runtime — while working perfectly in a development
+# checkout where the repository happens to sit alongside.
+[tool.setuptools.package-data]
+contract = ["*.json"]
