@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AIeConA Adapter Profile",
+  "description": "Declarative description of one source system. Configuration, not code. Validation fails closed: a profile that does not validate does not load.",
+  "type": "object",
+  "required": ["profile_version", "vendor_key", "partition", "auth", "transport", "entities", "sync"],
+  "additionalProperties": false,
+  "properties": {
+    "profile_version": { "type": "string" },
+    "vendor_key": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+    "display_name": { "type": "string" },
+    "partition": {
+      "type": "string",
+      "enum": ["core_hcm", "talent_acquisition", "enterprise_context"],
+      "description": "Determines the permitted write-target set. See Document 03A §6."
+    },
+    "auth": {
+      "type": "object",
+      "required": ["method", "credential_ref"],
+      "additionalProperties": false,
+      "properties": {
+        "method": { "type": "string", "enum": ["oauth2_client_credentials", "oauth2_jwt_bearer", "api_key", "basic", "mock_local"] },
+        "credential_ref": { "type": "string", "description": "Reference into the partition's own credential store. Never a literal secret." }
+      }
+    },
+    "transport": {
+      "type": "object",
+      "required": ["kind", "base_url", "pagination"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "type": "string", "enum": ["rest", "soap", "file"] },
+        "base_url": { "type": "string" },
+        "pagination": { "type": "string", "enum": ["cursor", "offset", "page_number", "none"] },
+        "rate_limit_per_minute": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "entities": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["cdm_target", "source_object", "field_map"],
+        "additionalProperties": false,
+        "properties": {
+          "cdm_target": {
+            "type": "string",
+            "description": "Canonical entity this populates. Validated against the partition allowlist at load."
+          },
+          "source_object": { "type": "string" },
+          "field_map": { "type": "object", "additionalProperties": { "type": "string" } },
+          "effective_date_field": { "type": "string" },
+          "known_at_field": {
+            "type": "string",
+            "description": "Transaction-time source. Required for bi-temporal targets; absence is recorded and surfaces as look-ahead bias in backtests (Doc 08 §1.1a)."
+          }
+        }
+      }
+    },
+    "sync": {
+      "type": "object",
+      "required": ["mode", "cadence_minutes"],
+      "additionalProperties": false,
+      "properties": {
+        "mode": { "type": "string", "enum": ["delta_then_full_reconcile", "full_only", "delta_only"] },
+        "delta_watermark": { "type": "string" },
+        "cadence_minutes": { "type": "integer", "minimum": 1 },
+        "full_reconcile_cadence_hours": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "identity_resolution": {
+      "type": "object",
+      "description": "How a record here resolves to an existing Person. Required for talent_acquisition (Doc 09 §3.1).",
+      "additionalProperties": false,
+      "required": ["rule"],
+      "properties": {
+        "rule": { "type": "string", "enum": ["email_match", "employee_id", "explicit", "none"] },
+        "source_field": { "type": "string" }
+      }
+    }
+  }
+}
