@@ -114,13 +114,18 @@ jobs:
       # The build artefacts were tracked in git until housekeeping A1. They are ignored
       # now, and this fails if they come back — a regenerated egg-info committed by
       # accident churns on every machine and shows as a modified file forever.
+      # Widened after the first version passed while `contract/__pycache__` was
+      # tracked — five .pyc files, invisible to a check that only knew about egg-info.
+      # A guard that names one artefact type is a guard against that artefact type, not
+      # against tracked build output.
       - name: No build artefacts are tracked
         run: |
-          if git ls-files | grep -q 'egg-info'; then
-            echo "::error::egg-info files are tracked again. They regenerate on every"\
-                 "install and are already in .gitignore, which does not apply to files"\
-                 "git is already tracking. Remove with: git rm -r --cached <path>"
-            git ls-files | grep 'egg-info'
+          if git ls-files | grep -qE '__pycache__|\.pyc$|egg-info|\.pytest_cache'; then
+            echo "::error::build artefacts are tracked. They regenerate on every"\
+                 "install or test run and are already in .gitignore, which does not"\
+                 "apply to files git is already tracking."\
+                 "Remove with: git rm -r --cached <path>"
+            git ls-files | grep -E '__pycache__|\.pyc$|egg-info|\.pytest_cache'
             exit 1
           fi
           echo "clean"

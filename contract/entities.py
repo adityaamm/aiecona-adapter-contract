@@ -23,7 +23,33 @@ class Provenance:
 
 @dataclass(frozen=True)
 class ValidPeriod:
-    """Valid time. One clock. Every entity has this."""
+    """Valid time. One clock. Every entity has this.
+
+    HALF-OPEN: `[valid_from, valid_to)`. D67.
+
+    `valid_to` is the first instant the version is **no longer** true, not the last
+    instant it was. One version ends exactly where the next begins, with no overlap and
+    no gap, which is what makes the exclusion constraints in the product's migrations
+    expressible at all.
+
+    **THIS IS A RECORD WINDOW AND NOT A REAL-WORLD FACT.** The distinction cost a
+    defect, so it is stated here where both the product and any harness read it.
+
+    Real-world employment dates use the opposite convention:
+
+        exit_date, engagement_end   the LAST day worked — inclusive
+        valid_to                    the first day the version is not true — exclusive
+
+    So an assignment for somebody whose last day is 30 September carries
+    `valid_to = 1 October`, not `valid_to = 30 September`. Mapping the exit date
+    straight into `valid_to` shortens every employment by a day and makes an engagement
+    that begins and ends on the same day inexpressible — `[30 Sept, 30 Sept)` contains
+    no time and the product's CHECK constraint refuses it.
+
+    Tenure in days is therefore `end - start + 1` on the real-world dates, and never
+    `valid_to - valid_from` on the record window. An adapter mapping a source system's
+    termination date must add a day when it writes `valid_to`.
+    """
     valid_from: date
     valid_to: date | None = None
 
