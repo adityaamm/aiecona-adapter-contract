@@ -1,5 +1,0 @@
-Metadata-Version: 2.4
-Name: aiecona-adapter-contract
-Version: 0.1.0
-Summary: Interface specification shared by the AIeConA HR product and its test harness. No data, no logic.
-Requires-Python: >=3.11

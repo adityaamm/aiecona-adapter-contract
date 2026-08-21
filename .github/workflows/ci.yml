@@ -1,0 +1,126 @@
+# Continuous integration for the AIeConA adapter contract.
+#
+# WHY THIS REPOSITORY NEEDED ONE
+#
+# It had none, and it is pip-installed from this URL by the aiecona-hr CI. So a bad
+# push here was undetected until aiecona-hr next ran, and then failed in a repository
+# that had not changed — with a traceback pointing at the consumer rather than at the
+# cause.
+#
+# WHAT IS ACTUALLY WORTH TESTING HERE
+#
+# Not the Python. These five modules are declarations: entity names, marker constants,
+# a version. There is no logic to get wrong.
+#
+# The packaging is the risk, and `pyproject.toml` says so in its own words:
+#
+#   "The JSON schema must travel WITH the installed package. Without this, a consumer
+#    that pip-installs the contract gets the Python modules but not the schema, and any
+#    profile validation fails at runtime — while working perfectly in a development
+#    checkout where the repository happens to sit alongside."
+#
+# That risk is real and was untested anywhere. Worse, the product carries a development
+# fallback that reads the schema from a sibling directory when the packaged copy is
+# missing — so a broken package works on every developer's machine and fails only once
+# deployed somewhere the repository does not sit next door.
+#
+# So every job below installs the package and then **leaves the repository directory**
+# before importing anything. Running from inside the checkout is what hides this class
+# of fault.
+
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  contract:
+    name: The contract installs, imports and ships its schema
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+
+      - name: Install as a consumer would
+        run: pip install .
+
+      # From /tmp, not from the checkout. Inside the repository `import contract` finds
+      # the source tree whether or not the package was built correctly, and
+      # `profile.schema.json` is readable as a plain file regardless of package-data.
+      # Both make a broken package look fine.
+      - name: The package imports from outside its own repository
+        working-directory: /tmp
+        run: |
+          python -c "
+          import contract
+          from contract import entities, interface, markers, version
+          print('contract', version.__dict__.get('VERSION', '(no VERSION)'))
+          print('loaded from', contract.__file__)
+          assert 'site-packages' in contract.__file__, (
+              'imported the checkout rather than the installed package — this check only means something when it runs from outside the repository')
+          "
+
+      - name: The JSON schema travels with the installed package
+        working-directory: /tmp
+        run: |
+          python -c "
+          import json
+          from importlib import resources
+
+          # Exactly how aiecona-hr reads it — resources.files, not a filesystem path.
+          # The product has a development fallback to a sibling directory; this asserts
+          # the path that does not depend on one.
+          text = (resources.files('contract') / 'profile.schema.json').read_text(encoding='utf-8')
+          schema = json.loads(text)
+          assert schema, 'the schema is present but empty'
+          assert '\$schema' in schema or 'type' in schema or 'properties' in schema, (
+              'profile.schema.json does not look like a JSON Schema document')
+          print('schema shipped:', len(text), 'bytes,', len(schema), 'top-level key(s)')
+          "
+
+      - name: The markers a consumer depends on are all present
+        working-directory: /tmp
+        run: |
+          python -c "
+          from contract.markers import (
+              RESERVED_ID_NAMESPACE, SYNTHETIC_MARKER_FIELD, SYNTHETIC_MARKER_VALUE,
+          )
+          # Gate 7 — the poison pill — rests entirely on these three names existing and
+          # not changing. The harness stamps them onto every record and the product
+          # refuses anything carrying them. Renaming one here silently disarms the pill
+          # in both repositories at once.
+          for name, value in (('RESERVED_ID_NAMESPACE', RESERVED_ID_NAMESPACE),
+                              ('SYNTHETIC_MARKER_FIELD', SYNTHETIC_MARKER_FIELD),
+                              ('SYNTHETIC_MARKER_VALUE', SYNTHETIC_MARKER_VALUE)):
+              assert isinstance(value, str) and value, name + ' is empty'
+              print(f'{name} = {value!r}')
+          "
+
+      - name: The canonical entity list is non-empty and unique
+        working-directory: /tmp
+        run: |
+          python -c "
+          from contract.interface import CANONICAL_ENTITIES
+          # The adapter allowlist is built from this. An empty list would permit
+          # nothing; a duplicated one makes a partition check ambiguous.
+          assert CANONICAL_ENTITIES, 'CANONICAL_ENTITIES is empty'
+          assert len(set(CANONICAL_ENTITIES)) == len(CANONICAL_ENTITIES), 'duplicates'
+          print(len(CANONICAL_ENTITIES), 'canonical entities declared')
+          "
+
+      # The build artefacts were tracked in git until housekeeping A1. They are ignored
+      # now, and this fails if they come back — a regenerated egg-info committed by
+      # accident churns on every machine and shows as a modified file forever.
+      - name: No build artefacts are tracked
+        run: |
+          if git ls-files | grep -q 'egg-info'; then
+            echo "::error::egg-info files are tracked again. They regenerate on every"\
+                 "install and are already in .gitignore, which does not apply to files"\
+                 "git is already tracking. Remove with: git rm -r --cached <path>"
+            git ls-files | grep 'egg-info'
+            exit 1
+          fi
+          echo "clean"
