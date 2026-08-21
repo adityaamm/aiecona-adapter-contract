@@ -4,7 +4,9 @@ aiecona_adapter_contract.egg-info/PKG-INFO
 aiecona_adapter_contract.egg-info/SOURCES.txt
 aiecona_adapter_contract.egg-info/dependency_links.txt
 aiecona_adapter_contract.egg-info/top_level.txt
+contract/__init__.py
 contract/entities.py
 contract/interface.py
 contract/markers.py
+contract/profile.schema.json
 contract/version.py
