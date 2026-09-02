@@ -47,5 +47,11 @@ CANONICAL_ENTITIES = (
     "PerformanceEvent", "RatingScale", "PerformanceCycle",
     "Requisition", "Candidate", "Application", "PipelineStage",
     "BusinessUnitMetric", "Offering", "StrategicPriority",
-    "RoleRequirement", "RoleInteraction",
+    # D90. `RoleRequiredTerm` was in the schema, in the HCM partition's remit and
+    # ABSENT HERE — so an adapter author reading this list would not know a job
+    # description's required skills could be supplied at all, and the partition
+    # allowlist refused the target because this list is what it validates against.
+    #
+    # Two guards agreeing on a wrong answer looked like a boundary and was a gap.
+    "RoleRequirement", "RoleRequiredTerm", "RoleInteraction",
 )
