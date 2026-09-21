@@ -56,16 +56,44 @@ class ValidPeriod:
 
 @dataclass(frozen=True)
 class TransactionPeriod:
-    """Transaction time. The second clock.
+    """Transaction time. The second clock — *when we came to know it*.
 
-    ONLY on Assignment and PerformanceEvent, per D7 Option B.
+    Four entities, per D125. Assignment and PerformanceEvent from D7 Option B; the
+    owner added BusinessUnitMetric and RoleRequirement.
+
+    THE TEST FOR WHETHER AN ENTITY BELONGS HERE IS NOT HOW OFTEN IT CHANGES
+
+    It is whether a change is ambiguous between *the world changed* and *we were
+    wrong*. Finance restates every close. A role requirement's `valid_from` is usually
+    the date somebody wrote the description down rather than the date the role became
+    that, so a correction to it is exactly the case where valid-time-only versioning
+    conflates a rewrite with a fix.
+
+    `Position` and `SkillAssertion` were considered and excluded on the same test: both
+    carry real event dates, so a change to either is unambiguous. Position is also the
+    slowest read in the system at scale (540 ms against role_requirement's 0.4 ms), and
+    a second clock on SkillAssertion would create a permanent, queryable record of every
+    superseded belief about a named individual's capability — a data-minimisation
+    liability rather than an audit asset.
     """
     tx_from: datetime
     tx_to: datetime | None = None
 
 
-# Which entities carry both clocks. Consumers must not widen this without D7 revision.
-BITEMPORAL_ENTITIES = frozenset({"Assignment", "PerformanceEvent"})
+# Which entities carry both clocks. Consumers must not widen this without an owner
+# ruling — D7 Option B set it, D125 widened it.
+#
+# **THIS IS RESTATED HERE AND DERIVED IN THE PRODUCT, AND THE TWO MUST AGREE.**
+# `AdapterProfile.entities_missing_transaction_time` reads THIS copy, because a profile
+# is authored against the document its author read. The product derives its own set from
+# one line in `canonical.query`. Nothing compared them until D123, and a widening
+# applied to one and not the other would either require a `known_at_field` the published
+# schema does not describe, or store two clocks for an entity whose profile was never
+# asked to supply the second. `test_projections` asserts the equality; **release this
+# package before the product.**
+BITEMPORAL_ENTITIES = frozenset({
+    "Assignment", "PerformanceEvent", "BusinessUnitMetric", "RoleRequirement",
+})
 
 # Which entities are append-only and carry neither period.
 APPEND_ONLY_ENTITIES = frozenset({"SnapshotLedger", "AuditEvent", "RestatementMap"})
