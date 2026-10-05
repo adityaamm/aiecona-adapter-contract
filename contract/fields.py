@@ -1,5 +1,5 @@
 """Declared fields an adapter may supply, where the contract must say more than the
-entity name — D159.
+entity name — D159, D166.
 
 THE HR SYSTEM'S CRITICAL FLAG
 
@@ -42,3 +42,27 @@ PEOPLE_LEVEL_FLAGS = frozenset({
     "potential",
     "readiness",
 })
+
+
+# ---------------------------------------------------------------------------
+# THE HR SYSTEM'S OCCUPATION CODE — D166 (contract 0.3.0)
+#
+# Some HR systems hold, on the JOB, the code of a standard occupation the job is — an
+# O*NET-SOC code, or an ESCO occupation URI. An adapter may supply it as
+# `hr_occupation_code`, always together with `hr_occupation_standard` saying which of
+# the two it is: both, or neither. The product does not take it as the link on trust:
+# it becomes the job's occupation once a Master confirms it (D165 ruling 1).
+#
+# Only ESCO and O*NET. A code from any other classification (ISCO-08, a national
+# scheme, SOC on its own) is not one of them and must not be supplied as one (D164).
+# ---------------------------------------------------------------------------
+
+HR_OCCUPATION_CODE = "hr_occupation_code"
+HR_OCCUPATION_STANDARD = "hr_occupation_standard"
+
+# The one entity that may carry them.
+HR_OCCUPATION_ENTITIES = ("Job",)
+
+# The values `hr_occupation_standard` may take — the names the product's own
+# `skill_standard` type uses.
+HR_OCCUPATION_STANDARDS = ("ESCO", "ONET")
