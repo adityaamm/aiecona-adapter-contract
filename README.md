@@ -17,6 +17,7 @@ See Document 01A Part B and Document 11 §2.
 | `contract/entities.py` | Canonical entity shapes the contract covers |
 | `contract/profile.schema.json` | JSON Schema for adapter profiles |
 | `contract/markers.py` | Reserved marker and namespace definitions (Gate 7) |
+| `contract/fields.py` | Declared fields beyond the entity name: the HR system's critical flag, and the people-level flags that may never be supplied as it (D159) |
 
 ## Rules
 
