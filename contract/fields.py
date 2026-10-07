@@ -66,3 +66,20 @@ HR_OCCUPATION_ENTITIES = ("Job",)
 # The values `hr_occupation_standard` may take — the names the product's own
 # `skill_standard` type uses.
 HR_OCCUPATION_STANDARDS = ("ESCO", "ONET")
+
+
+# ---------------------------------------------------------------------------
+# THE HR SYSTEM'S LEGAL-ENTITY CODE — D171 (contract 0.4.0)
+#
+# An org unit may carry, as `legal_entity_code`, the code the customer's HR system
+# gives the legal entity the unit belongs to — text, exactly as the HR system holds it.
+# The customer records the same code beside each legal entity at onboarding, which is
+# how the product knows which entity, and so which occupation standard (ESCO or O*NET,
+# D165 ruling 2), a job's positions sit in. Absent when the system does not hold one;
+# the product then asks a Master rather than guessing.
+# ---------------------------------------------------------------------------
+
+HR_LEGAL_ENTITY_CODE = "legal_entity_code"
+
+# The one entity that may carry it.
+HR_LEGAL_ENTITY_ENTITIES = ("OrgUnit",)
