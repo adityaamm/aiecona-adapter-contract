@@ -77,6 +77,8 @@ CANONICAL_ENTITIES = (
     # D172. A successor named for a position in the customer's HCM succession module.
     # See `contract.fields` for what it carries and what the product does with it.
     "SuccessionNomination",
+    # D175. The customer's own overall leadership score for a person (D150).
+    "LeadershipScore",
 )
 
 

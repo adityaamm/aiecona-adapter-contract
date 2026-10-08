@@ -106,3 +106,26 @@ HR_LEGAL_ENTITY_ENTITIES = ("OrgUnit",)
 SUCCESSION_NOMINATION = "SuccessionNomination"
 SUCCESSION_NOMINATION_FIELDS = ("nomination_id", "position_id", "person_id",
                                 "readiness_band")
+
+
+# ---------------------------------------------------------------------------
+# THE CUSTOMER'S LEADERSHIP SCORE — D150, D175 (contract 0.6.0)
+#
+# `LeadershipScore`: ONE overall score per person per assessment, produced by the
+# customer's own system or team applying their own leadership framework (D150). The
+# product never receives competency-level scores. Carries the score, the date it was
+# assessed, and the framework version it was produced under, exactly as the customer's
+# system holds them.
+#
+# WHAT THE PRODUCT DOES WITH IT (the owner's rulings, D175):
+#   * held only for people on at least one succession pipeline; others counted only;
+#   * too old to count after the customer's own setting (default 18 months, 6-24);
+#   * a score under a framework version other than the one recorded in IDeOM is held,
+#     labelled, never used, and counted for the Master;
+#   * every score is kept dated, only the latest current one used, and all are deleted
+#     under R1 when the person is on no pipeline.
+# ---------------------------------------------------------------------------
+
+LEADERSHIP_SCORE = "LeadershipScore"
+LEADERSHIP_SCORE_FIELDS = ("score_id", "person_id", "overall_score", "assessed_on",
+                           "framework_version")
