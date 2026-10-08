@@ -74,6 +74,9 @@ CANONICAL_ENTITIES = (
     #
     # Two guards agreeing on a wrong answer looked like a boundary and was a gap.
     "RoleRequirement", "RoleRequiredTerm", "RoleInteraction",
+    # D172. A successor named for a position in the customer's HCM succession module.
+    # See `contract.fields` for what it carries and what the product does with it.
+    "SuccessionNomination",
 )
 
 

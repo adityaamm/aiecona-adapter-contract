@@ -83,3 +83,26 @@ HR_LEGAL_ENTITY_CODE = "legal_entity_code"
 
 # The one entity that may carry it.
 HR_LEGAL_ENTITY_ENTITIES = ("OrgUnit",)
+
+
+# ---------------------------------------------------------------------------
+# SUCCESSION NOMINATIONS FROM THE HCM — D172 (contract 0.5.0)
+#
+# `SuccessionNomination`: one named successor for one position, as the customer's HCM
+# succession module holds it — the position, the person, and the customer's own
+# readiness band for them ("Ready now", "1-2 years" ...), text exactly as the HCM holds
+# it, or absent. A valid window like any other record.
+#
+# WHAT THE PRODUCT DOES WITH IT (the owner's rulings, D134, D135, D172):
+#   * held only for positions the customer has designated critical, and only for
+#     current employees — anything else is not stored, only counted;
+#   * a Master's own statement in the product prevails over the feed;
+#   * the readiness band is the customer's judgement, shown as theirs, never fed into
+#     the product's scoring;
+#   * a person's nominations are deleted at the next refresh after they are on no
+#     pipeline (R1, D151).
+# ---------------------------------------------------------------------------
+
+SUCCESSION_NOMINATION = "SuccessionNomination"
+SUCCESSION_NOMINATION_FIELDS = ("nomination_id", "position_id", "person_id",
+                                "readiness_band")
