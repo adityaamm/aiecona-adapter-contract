@@ -79,6 +79,9 @@ CANONICAL_ENTITIES = (
     "SuccessionNomination",
     # D175. The customer's own overall leadership score for a person (D150).
     "LeadershipScore",
+    # D201. A separate recruiting system's own catalogue of the jobs, positions and
+    # org units its requisitions name. See `contract.fields`.
+    "RecruitingReference",
 )
 
 

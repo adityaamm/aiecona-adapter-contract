@@ -129,3 +129,32 @@ SUCCESSION_NOMINATION_FIELDS = ("nomination_id", "position_id", "person_id",
 LEADERSHIP_SCORE = "LeadershipScore"
 LEADERSHIP_SCORE_FIELDS = ("score_id", "person_id", "overall_score", "assessed_on",
                            "framework_version")
+
+
+# ---------------------------------------------------------------------------
+# A RECRUITING SYSTEM SEPARATE FROM THE HR SYSTEM — D201 (contract 0.7.0)
+#
+# When recruiting runs in its own system, its requisitions name jobs, positions and
+# org units by THAT system's keys. The product never guesses which HR job a recruiting
+# key means. The recruiting adapter supplies the recruiting system's own catalogue of
+# what its requisitions name — each entry's key, the code it publishes, and its title
+# — as `RecruitingReference`, from the talent-acquisition partition. The product links
+# an entry to the HR system's job, position or org unit only on an exact match of the
+# published code (shown, and withdrawable by a Master), and proposes anything less for
+# a Master to confirm. A requisition whose references are not linked is kept, counted
+# and named as unresolved.
+#
+# `reference_kind` is one of JOB, POSITION, ORG_UNIT. `code` is the code the recruiting
+# system publishes for the entry (for a job, its job code), exactly as it holds it.
+# ---------------------------------------------------------------------------
+
+RECRUITING_REFERENCE = "RecruitingReference"
+RECRUITING_REFERENCE_FIELDS = ("reference_id", "reference_kind", "code", "title")
+RECRUITING_REFERENCE_KINDS = ("JOB", "POSITION", "ORG_UNIT")
+
+# An internal applicant's employee number, as the RECRUITING SYSTEM records it — the
+# HR system's own key for that employee. Optional on `Candidate`. The adapter supplies
+# the number and nothing more: the product, not the adapter, links the candidate to the
+# employee, under the declared rule EMPLOYEE_ID_SUPPLIED, and only where the number
+# names exactly one employee the HR system sent. Never inferred from a name or email.
+CANDIDATE_EMPLOYEE_REF = "employee_ref"
