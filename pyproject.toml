@@ -1,6 +1,6 @@
 [project]
 name = "aiecona-adapter-contract"
-version = "0.1.0"
+version = "0.7.1"
 description = "Interface specification shared by the AIeConA HR product and its test harness. No data, no logic."
 requires-python = ">=3.11"
 dependencies = []
